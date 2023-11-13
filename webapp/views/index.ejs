@@ -6,14 +6,21 @@
     
     <title><%= title %></title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
     <style>
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+        background-color: pink;
+      }
       span:hover {
         cursor: pointer;
       }
     </style>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel='stylesheet' href='/stylesheets/style.css' />
 
   </head>
   <body>
@@ -21,10 +28,10 @@
     <!--<h1><%= title %></h1>
     <p>Welcome to <%= title %></p>-->
 
-    <div class="container text-center">
+    <div class="container text-center pt-3 rounded shadow-sm" style="height: 100%; background-color: white;">
 
       <div class="row justify-content-center">
-        <div class="col-4 mb-3">
+        <div class="col-12 col-md-3 mb-3">
           <form id="newTaskForm">
             <div class="mb-3">
               <label for="newTaskInput" class="form-label">New Task</label>
@@ -32,15 +39,17 @@
               <div id="newTaskHelp" class="form-text"></div>
             </div>
             <div style="text-align: left;">
-              <button type="submit" class="btn btn-dark">Add</button>
+              <button type="submit" class="btn btn-sm btn-primary">Add</button>
             </div>
           </form>
         </div>
       </div>
 
+      <hr>
+
       <div class="row justify-content-center">
 
-        <div class="col-4">
+        <div class="col-12 col-md-3">
           <ul id="taskList" class="list-group">
             <!--<li class="list-group-item">An item</li>
             <li class="list-group-item">A second item</li>
@@ -62,7 +71,7 @@
         const newTask = document.createElement('li');
         const numberOfTasksInList = taskList.childElementCount + 1;
 
-        newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center');
+        newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center shadow-sm');
         newTask.innerHTML = '<input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox' +numberOfTasksInList+ '">'
         + document.getElementById('newTaskInput').value 
         + '<span class="badge text-bg-light rounded-pill" style="font-size:12pt;">&times;</span>';
