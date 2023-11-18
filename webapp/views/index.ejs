@@ -78,7 +78,8 @@
         .then(data => {
           //console.log(data);
           for(row in data.tasks) {
-            addTaskToUI(data.tasks[row].task_id,data.tasks[row].task_desc);
+            const newElement = createNewTaskElement(data.tasks[row].task_id, data.tasks[row].task_desc, data.tasks[row].task_status);
+            taskList.append(newElement);
           }
 
         })
@@ -87,19 +88,44 @@
         });
       };
 
-      function addTaskToUI(taskID,taskDescription) {
+      function createNewTaskElement(taskID,taskDescription,taskStatus) {
         const newTask = document.createElement('li');
-        const numberOfTasksInList = taskList.childElementCount + 1;
 
         newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center');
         newTask.setAttribute('data-task-id',taskID);
+        newTask.setAttribute('data-task-status',taskStatus);
 
-        newTask.innerHTML = `
-        <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${numberOfTasksInList}">
-        ${taskDescription}
-        <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
+        if(taskStatus == 0) {
+          newTask.innerHTML = `
+          <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${taskID}">
+          <div id="taskDesc${taskID}">${taskDescription}</div>
+          <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
+        } else {
+          newTask.innerHTML = `
+          <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${taskID}" checked disabled>
+          <div id="taskDesc${taskID}"><s>${taskDescription}</s></div>
+          <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
+        }
 
-        taskList.append(newTask);
+        return newTask;
+      }
+
+      function insertIntoList(item, list) {
+        var firstComplete = null;
+        
+        for(var i = 0; i < list.children.length; i++) {
+          if(list.children[i].getAttribute('data-task-status') == 1) {
+            firstComplete = list.children[i];
+            break;
+          }
+        }
+
+        if(firstComplete !== null) {
+          item.remove();
+          list.insertBefore(item, firstComplete);
+        } else {
+          list.append(item);
+        }
       }
 
       function addTaskToDB(taskDescription) {
@@ -119,8 +145,33 @@
         })
         .then(data => {
 
-          addTaskToUI(data.task_id,taskDescription);
+          const newElement = createNewTaskElement(data.task_id, taskDescription, 0);
+          insertIntoList(newElement, taskList);
 
+        })
+        .catch(error => {
+          console.error('Task POST error:', error);
+        });
+
+      }
+
+      function markTaskAsClosedInDB(taskID) {
+
+        fetch('http://localhost:3000/tasks/closed', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ taskID: taskID, userID: '1' }), // TODO: User management.
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
         })
         .catch(error => {
           console.error('Task POST error:', error);
@@ -156,34 +207,34 @@
         event.preventDefault();
 
         const taskDesc = document.getElementById('newTaskInput').value;
-
         addTaskToDB(taskDesc);
 
         form.reset();
       });
 
       taskList.addEventListener('click', function(event){
+        const listItem = event.target.closest('li');
+        const taskID = listItem.getAttribute('data-task-id');
 
-        if (event.target.tagName === 'INPUT') {
-          const listItem = event.target.closest('li');
-          if (listItem){
-
+        if(listItem != undefined) {
+          if (event.target.tagName == 'INPUT') {     
             setTimeout(function () {
-              listItem.remove();
 
-              // Completed task.
+              markTaskAsClosedInDB(taskID);
 
+              const input = listItem.getElementsByTagName('input')[0];
+              input.disabled = true;
+              input.checked = true;
+
+              const taskDesc = document.getElementById('taskDesc'+taskID);
+              taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
+
+              insertIntoList(listItem, taskList);
+
+              listItem.setAttribute('data-task-status',1);
 
             }, 1000);
-
-          }
-        }
-
-        if (event.target.tagName === 'SPAN') {
-          const listItem = event.target.closest('li');
-          const taskID = listItem.getAttribute('data-task-id');
-
-          if (listItem != undefined){
+          } else if (event.target.tagName == 'SPAN') {
             deleteTaskFromDB(taskID);
             listItem.remove();
           }

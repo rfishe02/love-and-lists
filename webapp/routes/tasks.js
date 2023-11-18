@@ -9,13 +9,13 @@ router.get('/get', function(req, res, next) {
     const data = {"tasks":[],"status":""};
 
     db.serialize(() => {
-        db.all(`select * from tasks where task_user = ?`,userID, (err, rows) => {
+        db.all(`select * from tasks where task_user = ? order by task_status asc, task_id asc`,userID, (err, rows) => {
             if(rows !== undefined) {
                 rows.forEach(row => {
                     var task = {};
                     task["task_id"] = row["task_id"];
                     task["task_desc"] = row["task_desc"];
-                    task["task_staus"] = row["task_status"];
+                    task["task_status"] = row["task_status"];
 
                     data["tasks"].push(task);
                 });
@@ -57,12 +57,34 @@ router.post('/create', function(req, res, next) {
 
 });
 
-router.patch('/finish', function(req, res, next) {
-    res.send(`Marked task as complete.`);
+router.patch('/open', function(req, res, next) {
+    res.send(`Marked task as still in progress.`); // TODO: task open?
+});
+
+router.patch('/closed', function(req, res, next) {
+    const taskID = req.body.taskID;
+    const userID = req.body.userID;
+
+    const db = new sqlite3.Database('./webapp.db');
+
+    db.serialize(() => {
+        const stmt = db.prepare(`update tasks set task_status = 1 where task_id = ? and task_user = ?`);
+        stmt.run(taskID,userID, (err) =>{
+            if(err === null) {       
+
+                stmt.finalize();
+                res.json({"status":"OK"});
+
+            } else {
+                console.log("TASK CREATE ERROR: "+err); // TODO: Error logging
+                return;
+            }
+        });
+        
+    });
 });
 
 router.delete('/delete', function(req, res, next) {
-
     const taskID = req.body.taskID;
     const userID = req.body.userID;
 
@@ -83,7 +105,6 @@ router.delete('/delete', function(req, res, next) {
         });
         
     });
-    
 });
 
 module.exports = router;
