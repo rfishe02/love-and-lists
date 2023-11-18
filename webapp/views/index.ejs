@@ -25,7 +25,7 @@
     </style>
 
   </head>
-  <body>
+  <body onload="loadTasks()">
 
     <!--<h1><%= title %></h1>
     <p>Welcome to <%= title %></p>-->
@@ -67,24 +67,49 @@
       const form = document.getElementById('newTaskForm');
       const taskList = document.getElementById('taskList');
 
-      form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
+      function loadTasks() {
+        fetch('http://localhost:3000/tasks/get?userID=1')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json(); // Parse the response body as JSON
+        })
+        .then(data => {
+
+          for(row in data.tasks) {
+            //console.log(data.tasks[row]);
+            addNewTask(data.tasks[row].task_desc);
+          }
+
+        })
+        .catch(error => {
+          // Handle errors here
+          console.error('Fetch Error:', error);
+        });
+      };
+
+      function addNewTask(taskDesc) {
         const newTask = document.createElement('li');
         const numberOfTasksInList = taskList.childElementCount + 1;
 
         newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center');
         newTask.innerHTML = '<input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox' +numberOfTasksInList+ '">'
-        + document.getElementById('newTaskInput').value 
+        + taskDesc
         + '<span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>';
 
         taskList.append(newTask);
+      }
+
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        addNewTask(document.getElementById('newTaskInput').value );
+
         form.reset();
       });
 
       taskList.addEventListener('click', function(event){
-
-        console.log(event.target.tagName);
 
         if (event.target.tagName === 'INPUT') {
           const listItem = event.target.closest('li');
@@ -93,7 +118,7 @@
             setTimeout(function () {
               listItem.remove();
 
-              // Add function.
+              // Completed task.
             }, 1000);
 
           }
@@ -104,7 +129,7 @@
           if (listItem){
             listItem.remove();
 
-            // Delete function.
+            // Deleted task.
           }
         }
 

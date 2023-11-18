@@ -4,23 +4,32 @@ var router = express.Router();
 var sqlite3 = require('sqlite3').verbose();
 
 router.get('/get', function(req, res, next) {
+    const userID = req.query.userID;
     const db = new sqlite3.Database('./webapp.db');
-    tasks = []
+    const data = {"tasks":[],"status":""};
 
     db.serialize(() => {
-        db.all(`select * from tasks`, function (err, rows) {
+        db.all(`select * from tasks where task_user = ?`,userID, (err, rows) => {
             if(rows !== undefined) {
                 rows.forEach(row => {
-                    tasks.push(row);
+                    var task = {};
+                    task["task_desc"] = row["task_desc"];
+                    task["task_staus"] = row["task_status"];
+                    
+                    data["tasks"].push(task);
                 });
-                res.send(tasks);
+                data["status"] = "OK";
+                res.json(data);
             } else {
-                console.log(err);
+                console.log(err); // TODO: Error logging
+                data["status"] = "ERROR";
                 return;
             }
         });
     });
 
 });
+
+
 
 module.exports = router;
