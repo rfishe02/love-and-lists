@@ -78,33 +78,60 @@
         .then(data => {
 
           for(row in data.tasks) {
-            //console.log(data.tasks[row]);
-            addNewTask(data.tasks[row].task_desc);
+            addTaskToUI(data.tasks[row].task_desc);
           }
 
         })
         .catch(error => {
-          // Handle errors here
-          console.error('Fetch Error:', error);
+          console.error('Task GET error:', error);
         });
       };
 
-      function addNewTask(taskDesc) {
+      function addTaskToUI(taskDescription) {
         const newTask = document.createElement('li');
         const numberOfTasksInList = taskList.childElementCount + 1;
 
         newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center');
-        newTask.innerHTML = '<input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox' +numberOfTasksInList+ '">'
-        + taskDesc
-        + '<span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>';
+
+        newTask.innerHTML = `
+        <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${numberOfTasksInList}">
+        ${taskDescription}
+        <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
 
         taskList.append(newTask);
+      }
+
+      function addTaskToDB(taskDescription) {
+
+        fetch('http://localhost:3000/tasks/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ taskDesc: taskDescription, userID: '1' }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          console.error('Task POST error:', error);
+        });
+
       }
 
       form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        addNewTask(document.getElementById('newTaskInput').value );
+        const taskDesc = document.getElementById('newTaskInput').value;
+
+        addTaskToUI(taskDesc);
+        addTaskToDB(taskDesc);
 
         form.reset();
       });
@@ -119,6 +146,8 @@
               listItem.remove();
 
               // Completed task.
+
+
             }, 1000);
 
           }
