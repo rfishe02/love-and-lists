@@ -76,9 +76,9 @@
           return response.json(); // Parse the response body as JSON
         })
         .then(data => {
-
+          //console.log(data);
           for(row in data.tasks) {
-            addTaskToUI(data.tasks[row].task_desc);
+            addTaskToUI(data.tasks[row].task_id,data.tasks[row].task_desc);
           }
 
         })
@@ -87,11 +87,12 @@
         });
       };
 
-      function addTaskToUI(taskDescription) {
+      function addTaskToUI(taskID,taskDescription) {
         const newTask = document.createElement('li');
         const numberOfTasksInList = taskList.childElementCount + 1;
 
         newTask.setAttribute('class','list-group-item d-flex justify-content-between align-items-center');
+        newTask.setAttribute('data-task-id',taskID);
 
         newTask.innerHTML = `
         <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${numberOfTasksInList}">
@@ -108,7 +109,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ taskDesc: taskDescription, userID: '1' }),
+          body: JSON.stringify({ taskDesc: taskDescription, userID: '1' }), // TODO: User management.
         })
         .then(response => {
           if (!response.ok) {
@@ -117,7 +118,33 @@
           return response.json();
         })
         .then(data => {
-          console.log(data);
+
+          addTaskToUI(data.task_id,taskDescription);
+
+        })
+        .catch(error => {
+          console.error('Task POST error:', error);
+        });
+
+      }
+
+      function deleteTaskFromDB (taskID) {
+
+        fetch('http://localhost:3000/tasks/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ taskID: taskID, userID: '1' }), // TODO: User management.
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          //console.log(data);
         })
         .catch(error => {
           console.error('Task POST error:', error);
@@ -130,7 +157,6 @@
 
         const taskDesc = document.getElementById('newTaskInput').value;
 
-        addTaskToUI(taskDesc);
         addTaskToDB(taskDesc);
 
         form.reset();
@@ -155,10 +181,11 @@
 
         if (event.target.tagName === 'SPAN') {
           const listItem = event.target.closest('li');
-          if (listItem){
-            listItem.remove();
+          const taskID = listItem.getAttribute('data-task-id');
 
-            // Deleted task.
+          if (listItem != undefined){
+            deleteTaskFromDB(taskID);
+            listItem.remove();
           }
         }
 

@@ -13,6 +13,7 @@ router.get('/get', function(req, res, next) {
             if(rows !== undefined) {
                 rows.forEach(row => {
                     var task = {};
+                    task["task_id"] = row["task_id"];
                     task["task_desc"] = row["task_desc"];
                     task["task_staus"] = row["task_status"];
 
@@ -39,9 +40,13 @@ router.post('/create', function(req, res, next) {
     db.serialize(() => {
         const stmt = db.prepare(`insert into tasks (task_desc,task_status,task_user) values (?,0,?)`);
         stmt.run(taskDesc,userID, (err) =>{
-            if(err === null) {
+            if(err === null) {       
+
+                const taskID = stmt.lastID;
                 stmt.finalize();
-                res.send(`Created Task.`);
+
+                res.json({"task_id":taskID});
+
             } else {
                 console.log("TASK REATE ERROR: "+err); // TODO: Error logging
                 return;
@@ -57,7 +62,28 @@ router.patch('/finish', function(req, res, next) {
 });
 
 router.delete('/delete', function(req, res, next) {
-    res.send(`Removed task.`);
+
+    const taskID = req.body.taskID;
+    const userID = req.body.userID;
+
+    const db = new sqlite3.Database('./webapp.db');
+
+    db.serialize(() => {
+        const stmt = db.prepare(`delete from tasks where task_id = ? and task_user = ?`);
+        stmt.run(taskID,userID, (err) =>{
+            if(err === null) {       
+
+                stmt.finalize();
+                res.json({"status":"OK"});
+
+            } else {
+                console.log("TASK REATE ERROR: "+err); // TODO: Error logging
+                return;
+            }
+        });
+        
+    });
+    
 });
 
 module.exports = router;
