@@ -21,13 +21,32 @@
         font: Helvetica, sans-serif;
       }
 
+      a {
+        color: #00B7FF;
+      }
+
+      #settings-space {
+        background-color: white; 
+        height: 100%; 
+        display: none;
+      }
+
+      #settings-button:hover {
+        cursor: pointer;
+      }
+
       span:hover {
         cursor: pointer;
       }
 
-      a {
-        color: #00B7FF;
+      button:hover {
+        cursor: pointer;
       }
+
+      #main-navbar {
+        background-color: #ffd1e8;
+      }
+      
     </style>
 
   </head>
@@ -36,27 +55,42 @@
     <!--<h1><%= title %></h1>
     <p>Welcome to <%= title %></p>-->
 
-    <nav class="navbar shadow-sm" style="background-color: #ffd1e8;" data-bs-theme="dark">
+    <nav id="main-navbar" class="navbar shadow-sm">
       <div class="container-fluid">
         <a class="navbar-brand" style="color: black; font-size: 12pt;">&hearts; Love & Lists</a>
-        <svg id="settingsButton" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+        <svg id="settings-button" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
           <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
         </svg>
       </div>
     </nav>
 
-    <div class="container mt-3">
+    <div id="settings-space" class="container pt-3">
+
+      <div class="row justify-content-center">
+        <div class="col-10 col-md-6">
+          <form id="chara-edit-form">
+
+            
+
+            <button type="submit" class="btn btn-sm btn-primary shadow-sm">Submit</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="tasks-space" class="container mt-3">
 
       <div class="row justify-content-center" >
         <div class="col-10 col-md-6 text-center rounded shadow-sm" style="background-color: white;">
 
           <div class="row mt-3 justify-content-center">
             <div class="col">
-              <form id="newTaskForm">
+              <form id="new-task-form">
                 <div class="mb-2">
-                  <label for="newTaskInput" class="form-label">To-Do</label>
-                  <input type="text" class="form-control" id="newTaskInput" aria-describedby="newTaskHelp">
-                  <div id="newTaskHelp" class="form-text"></div>
+                  <label for="new-task-input" class="form-label">To-Do</label>
+                  <input type="text" class="form-control" id="new-task-input" aria-describedby="newTaskHelp">
+                  <div id="new-task-help" class="form-text"></div>
                 </div>
                 <div style="text-align: left;">
                   <button type="submit" class="btn btn-sm btn-primary shadow-sm">Add</button>
@@ -70,7 +104,7 @@
           <div class="row justify-content-center" style="min-height: 750px;">
     
             <div class="col">
-              <ul id="taskList" class="list-group list-group-flush">
+              <ul id="task-list" class="list-group list-group-flush">
               </ul>
             </div>
     
@@ -82,9 +116,10 @@
     </div>
 
     <script>
-      const form = document.getElementById('newTaskForm');
-      const taskList = document.getElementById('taskList');
-      const settingsButton = document.getElementById('settingsButton');
+      const taskForm = document.getElementById('new-task-form');
+      const taskList = document.getElementById('task-list');
+      const settingsButton = document.getElementById('settings-button');
+      const charaForm = document.getElementById('chara-edit-form');
 
       function loadTasks() {
         fetch('http://localhost:3000/tasks/get?userID=1')
@@ -117,12 +152,12 @@
         if(taskStatus == 0) {
           newTask.innerHTML = `
           <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${taskID}">
-          <div id="taskDesc${taskID}">${taskDescription}</div>
+          <div id="task-desc${taskID}">${taskDescription}</div>
           <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
         } else {
           newTask.innerHTML = `
           <input class="form-check-input me-1" type="checkbox" value="" id="taskCheckbox${taskID}" checked disabled>
-          <div id="taskDesc${taskID}"><s>${taskDescription}</s></div>
+          <div id="task-desc${taskID}"><s>${taskDescription}</s></div>
           <span class="badge text-bg-light rounded-pill shadow-sm" style="font-size:12pt;">&times;</span>`;
         }
 
@@ -222,13 +257,13 @@
 
       }
 
-      form.addEventListener('submit', function(event) {
+      taskForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        const taskDesc = document.getElementById('newTaskInput').value;
+        const taskDesc = document.getElementById('new-task-input').value;
         addTaskToDB(taskDesc);
 
-        form.reset();
+        taskForm.reset();
       });
 
       taskList.addEventListener('click', function(event){
@@ -245,7 +280,7 @@
               input.disabled = true;
               input.checked = true;
 
-              const taskDesc = document.getElementById('taskDesc'+taskID);
+              const taskDesc = document.getElementById('task-desc'+taskID);
               taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
 
               insertIntoList(listItem, taskList);
@@ -262,8 +297,22 @@
       });
 
       settingsButton.addEventListener('click', function(event){
-        
-        console.log("settings");
+        const settingsSpace = document.getElementById('settings-space');
+        const tasksSpace = document.getElementById('tasks-space'); 
+
+        if(settingsSpace.style.display == 'none') {
+          settingsSpace.style.display = 'block';
+          tasksSpace.style.display = 'none';
+        } else {
+          settingsSpace.style.display = 'none';
+          tasksSpace.style.display = 'block';
+        }
+      });
+
+      charaForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        console.log('submit chara form');
 
       });
 
