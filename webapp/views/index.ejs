@@ -28,9 +28,8 @@
       #settings-space {
         background-color: white; 
         height: 100%; 
-        display: none;
       }
-
+      
       #settings-button:hover {
         cursor: pointer;
       }
@@ -88,7 +87,7 @@
       </div>
     </div>
 
-    <div id="settings-space" class="container pt-3">
+    <div id="settings-space" class="container pt-3" style="display: none;">
 
       <div class="row justify-content-center">
         <div class="col-10 col-md-6">
@@ -131,7 +130,7 @@
 
     </div>
 
-    <div id="tasks-space" class="container mt-3">
+    <div id="tasks-space" class="container mt-3" style="display: block;">
 
       <div class="row justify-content-center" >
         <div class="col-10 col-md-6 text-center rounded shadow-sm" style="background-color: white;">
@@ -423,6 +422,10 @@
       });
 
       settingsButton.addEventListener('click', function(event){
+        showOrHideSettingsSpace();
+      });
+
+      function showOrHideSettingsSpace() {
         const settingsSpace = document.getElementById('settings-space');
         const tasksSpace = document.getElementById('tasks-space'); 
 
@@ -433,7 +436,7 @@
           settingsSpace.style.display = 'none';
           tasksSpace.style.display = 'block';
         }
-      });
+      }
 
       charaForm.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -459,6 +462,7 @@
         })
         .then(data => {
           console.log(data);
+          showOrHideSettingsSpace();
         })
         .catch(error => {
           console.error('Task POST error:', error);
