@@ -26,7 +26,7 @@ router.get('/get', function(req, res, next) {
                 data["status"] = "OK";
                 res.json(data);
             } else {
-                console.log("TASK GET ERROR: "+err); // TODO: Error logging
+                console.log("CHARA GET ERROR: "+err); // TODO: Error logging
                 return;
             }
         });

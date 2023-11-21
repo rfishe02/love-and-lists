@@ -64,13 +64,37 @@
       </div>
     </nav>
 
+    <div class="modal fade" id="chara-modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <!--<h1 class="modal-title fs-5" id="chara-modal-label">Modal title</h1>-->
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row justify-content-center">
+              <img src="#" style="height: 275px; object-fit: cover;">
+            </div>
+            <div class="row mt-3 justify-content-center" style="height: 175px; overflow: scroll;">
+              <div class="col-10">
+                <p id="chara-modal-text"></p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-secondary shadow-sm" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="settings-space" class="container pt-3">
 
       <div class="row justify-content-center">
         <div class="col-10 col-md-6">
           <form id="chara-edit-form">
             <div class="mb-2">
-              <label for="chara-name" class="form-label">Character Name</label>
+              <!--<label for="chara-name" class="form-label">Character Name</label>-->
               <input type="text" class="form-control" id="chara-name" name="chara_name">
             </div>
 
@@ -130,12 +154,10 @@
           <hr>
     
           <div class="row justify-content-center" style="min-height: 750px;">
-    
             <div class="col">
               <ul id="task-list" class="list-group list-group-flush">
               </ul>
             </div>
-    
           </div>
           
         </div>
@@ -309,7 +331,7 @@
       }
 
       function markTaskAsClosedInDB(taskID) {
-
+        
         fetch('http://localhost:3000/tasks/closed', {
           method: 'PATCH',
           headers: {
@@ -325,6 +347,11 @@
         })
         .then(data => {
           console.log(data);
+
+          var charaModal = document.getElementById("chara-modal");
+          var charaModalPopup = new bootstrap.Modal(charaModal, {});
+          charaModalPopup.show();
+
         })
         .catch(error => {
           console.error('Task POST error:', error);
