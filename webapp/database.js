@@ -31,11 +31,9 @@ function createTables(db) {
     create table characters (
         chara_id integer primary key,
         chara_name text not null,
-        chara_persona text not null,
+        chara_archetype text not null,
         chara_eyes text not null,
         chara_hair text not null,
-        chara_age text not null,
-        chara_style text not null,
         chara_bond integer not null,
         chara_user integer not null,
         foreign key (chara_user) references users(user_id)

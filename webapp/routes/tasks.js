@@ -4,7 +4,7 @@ var router = express.Router();
 var sqlite3 = require('sqlite3').verbose();
 
 router.get('/get', function(req, res, next) {
-    const userID = req.query.userID;
+    const userID = req.query.user_id;
     const db = new sqlite3.Database('./webapp.db');
     const data = {"tasks":[],"status":""};
 
@@ -31,9 +31,8 @@ router.get('/get', function(req, res, next) {
 });
 
 router.post('/create', function(req, res, next) {
-
-    const userID = req.body.userID;
-    const taskDesc = req.body.taskDesc;
+    const userID = req.body.user_id;
+    const taskDesc = req.body.task_desc;
 
     const db = new sqlite3.Database('./webapp.db');
 
@@ -54,7 +53,6 @@ router.post('/create', function(req, res, next) {
         });
         
     });
-
 });
 
 router.patch('/open', function(req, res, next) {
@@ -62,8 +60,8 @@ router.patch('/open', function(req, res, next) {
 });
 
 router.patch('/closed', function(req, res, next) {
-    const taskID = req.body.taskID;
-    const userID = req.body.userID;
+    const taskID = req.body.task_id;
+    const userID = req.body.user_id;
 
     const db = new sqlite3.Database('./webapp.db');
 
@@ -85,8 +83,8 @@ router.patch('/closed', function(req, res, next) {
 });
 
 router.delete('/delete', function(req, res, next) {
-    const taskID = req.body.taskID;
-    const userID = req.body.userID;
+    const taskID = req.body.task_id;
+    const userID = req.body.user_id;
 
     const db = new sqlite3.Database('./webapp.db');
 
@@ -99,7 +97,7 @@ router.delete('/delete', function(req, res, next) {
                 res.json({"status":"OK"});
 
             } else {
-                console.log("TASK REATE ERROR: "+err); // TODO: Error logging
+                console.log("TASK CREATE ERROR: "+err); // TODO: Error logging
                 return;
             }
         });

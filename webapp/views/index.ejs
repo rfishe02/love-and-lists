@@ -50,7 +50,7 @@
     </style>
 
   </head>
-  <body onload="loadTasks()">
+  <body onload="appSetup()">
 
     <!--<h1><%= title %></h1>
     <p>Welcome to <%= title %></p>-->
@@ -69,11 +69,39 @@
       <div class="row justify-content-center">
         <div class="col-10 col-md-6">
           <form id="chara-edit-form">
+            <div class="mb-2">
+              <label for="chara-name" class="form-label">Character Name</label>
+              <input type="text" class="form-control" id="chara-name" name="chara_name">
+            </div>
 
+            <div class="mb-2">
+              <select id="hair-select" name="hair_color" class="form-select" aria-label="Hair Color">
+                <option value="" selected>Choose a hair color</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <select id="eye-select" name="eye_color" class="form-select" aria-label="Eye Color">
+                <option value="" selected>Choose an eye color</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <select id="archetype-select" name="chara_type" class="form-select" aria-label="Character Archetype" onchange="displayTypeDesc()">
+                <option value="" selected>Choose an archetype</option>
+              </select>
+            </div>
             
-
-            <button type="submit" class="btn btn-sm btn-primary shadow-sm">Submit</button>
+            <div style="text-align: left;">
+              <button type="submit" class="btn btn-sm btn-primary shadow-sm">Submit</button>
+            </div>
           </form>
+        </div>
+      </div>
+
+      <div class="row mt-3 justify-content-center">
+        <div class="col-10 col-md-6">
+          <p id="type-desc"></p>
         </div>
       </div>
 
@@ -89,7 +117,7 @@
               <form id="new-task-form">
                 <div class="mb-2">
                   <label for="new-task-input" class="form-label">To-Do</label>
-                  <input type="text" class="form-control" id="new-task-input" aria-describedby="newTaskHelp">
+                  <input type="text" class="form-control" id="new-task-input" aria-describedby="new-task-help">
                   <div id="new-task-help" class="form-text"></div>
                 </div>
                 <div style="text-align: left;">
@@ -120,14 +148,63 @@
       const taskList = document.getElementById('task-list');
       const settingsButton = document.getElementById('settings-button');
       const charaForm = document.getElementById('chara-edit-form');
+      const charaName = document.getElementById('chara-name');
+      const hairSelect = document.getElementById('hair-select');
+      const eyeSelect = document.getElementById('eye-select');
+      const typeSelect = document.getElementById('archetype-select');
+      const typeDescDisplay = document.getElementById('type-desc');
+      const charaTypeDesc = ['',
+      'An introverted character who becomes more expressive around someone they trust.'
+      ,'A character who is consistently sweet, affectionate, and cheerful.'
+      ,'A character that is outwardly aloof but secretly compassionate.'
+      ,'A character who playfully teases others.'
+      ,'A character that starts off as cold and aloof but later become warm and affectionate.'];
+
+      function appSetup() {
+        buildSettingsForm();
+        loadTasks();
+        loadChara();
+      }
+
+      function buildSettingsForm() {
+        hairColors = ['Black','Blonde','Brown','Red','White'];
+        eyeColors = ['Blue','Brown','Green','Gray','Hazel'];
+        charaTypes = ['Dandere','Deredere','Kuudere','Teasedere','Tsundere'];
+
+        for(var i = 0; i < hairColors.length; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = hairColors[i];
+          newOption.text = hairColors[i];
+          hairSelect.append(newOption);
+        }
+
+        for(var i = 0; i < eyeColors.length; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = eyeColors[i];
+          newOption.text = eyeColors[i];
+          eyeSelect.append(newOption);
+        }
+
+        for(var i = 0; i < charaTypes.length; i++) {
+          const newOption = document.createElement('option');
+          newOption.value = charaTypes[i];
+          newOption.text = charaTypes[i];
+          typeSelect.append(newOption);
+        }     
+      }
+
+      function displayTypeDesc() {
+        const typeIndex = typeSelect.selectedIndex;
+        typeDescDisplay.innerHTML = charaTypeDesc[typeIndex];
+      }
 
       function loadTasks() {
-        fetch('http://localhost:3000/tasks/get?userID=1')
+        fetch('http://localhost:3000/tasks/get?user_id=1')
         .then(response => {
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Task response was not OK');
           }
-          return response.json(); // Parse the response body as JSON
+          return response.json();
         })
         .then(data => {
           //console.log(data);
@@ -141,6 +218,28 @@
           console.error('Task GET error:', error);
         });
       };
+
+      function loadChara() {
+        fetch('http://localhost:3000/chara/get?chara_id=1&user_id=1')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Chara response was not OK');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.chara.length > 0) {
+            charaName.value = data.chara[0].chara_name;
+            hairSelect.value = data.chara[0].chara_hair;
+            eyeSelect.value = data.chara[0].chara_eyes;
+            typeSelect.value = data.chara[0].chara_type;
+            displayTypeDesc();
+          }
+        })
+        .catch(error => {
+          console.error('Task GET error:', error);
+        });        
+      }
 
       function createNewTaskElement(taskID,taskDescription,taskStatus) {
         const newTask = document.createElement('li');
@@ -189,7 +288,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ taskDesc: taskDescription, userID: '1' }), // TODO: User management.
+          body: JSON.stringify({ "task_desc": taskDescription, "user_id": '1' }), // TODO: User management.
         })
         .then(response => {
           if (!response.ok) {
@@ -216,7 +315,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ taskID: taskID, userID: '1' }), // TODO: User management.
+          body: JSON.stringify({ "task_id": taskID, "user_id": '1' }), // TODO: User management.
         })
         .then(response => {
           if (!response.ok) {
@@ -240,7 +339,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ taskID: taskID, userID: '1' }), // TODO: User management.
+          body: JSON.stringify({ "task_id": taskID, "user_id": '1' }), // TODO: User management.
         })
         .then(response => {
           if (!response.ok) {
@@ -312,7 +411,31 @@
       charaForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        console.log('submit chara form');
+        const formData = new FormData(event.target);
+        formData.append("chara_id",'1');
+        formData.append("user_id",'1'); // TODO: User management.
+
+        const json = JSON.stringify(Object.fromEntries(formData));
+ 
+        fetch('http://localhost:3000/chara/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json, 
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Chara response was not OK');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          console.error('Task POST error:', error);
+        });
 
       });
 
