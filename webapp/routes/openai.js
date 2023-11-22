@@ -14,7 +14,7 @@ function createChatPrompt(charaName,taskDesc) {
 }
 
 function createImagePrompt(charHair,charEyes,charaType,taskDesc) {
-  return `anime style illustration, vibrant and detailed, male otome character with ${charHair} hair and ${charEyes} eyes, ${charaType} personality, context of ${taskDesc}, romantic atmosphere`;
+  return `anime style illustration, vibrant and detailed, male otome character with ${charHair} hair and ${charEyes} eyes, ${charaType} personality, context of ${taskDesc}, cozy atmosphere`;
 }
 
 router.get('/get', async function(req, res, next) {
