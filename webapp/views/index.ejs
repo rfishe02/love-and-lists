@@ -63,7 +63,7 @@
       </div>
     </nav>
 
-    <div class="modal fade" id="chara-modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
+    <div class="modal" id="chara-modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -72,7 +72,7 @@
           </div>
           <div class="modal-body">
             <div class="row justify-content-center">
-              <img src="#" style="height: 275px; object-fit: cover;">
+              <img id="chara-modal-img" src="#" style="height: 275px; object-fit: cover;">
             </div>
             <div class="row mt-3 justify-content-center" style="height: 175px; overflow: scroll;">
               <div class="col-10">
@@ -91,10 +91,12 @@
 
       <div class="row justify-content-center">
         <div class="col-10 col-md-6">
+
+          <h5>Character Settings</h5>
           <form id="chara-edit-form">
             <div class="mb-2">
               <!--<label for="chara-name" class="form-label">Character Name</label>-->
-              <input type="text" class="form-control" id="chara-name" name="chara_name">
+              <input type="text" class="form-control" id="chara-name" name="chara_name" placeholder="Enter a name">
             </div>
 
             <div class="mb-2">
@@ -109,22 +111,17 @@
               </select>
             </div>
 
-            <div class="mb-2">
-              <select id="archetype-select" name="chara_type" class="form-select" aria-label="Character Archetype" onchange="displayTypeDesc()">
-                <option value="" selected>Choose an archetype</option>
+            <div class="mb-2" style="min-height: 90px;">
+              <select id="archetype-select" name="chara_type" class="form-select" aria-label="Character Archetype" onchange="displayTypeHelp()">
+                <option value="" aria-describedby="chara-type-help" selected>Choose an archetype</option>
               </select>
+              <small id="chara-type-help" class="form-text text-muted"></small>
             </div>
             
-            <div style="text-align: left;">
-              <button type="submit" class="btn btn-sm btn-primary shadow-sm">Submit</button>
+            <div style="text-align: right;">
+              <button type="submit" class="btn btn-sm btn-primary shadow-sm">Save</button>
             </div>
           </form>
-        </div>
-      </div>
-
-      <div class="row mt-3 justify-content-center">
-        <div class="col-10 col-md-6">
-          <p id="type-desc"></p>
         </div>
       </div>
 
@@ -173,7 +170,6 @@
       const hairSelect = document.getElementById('hair-select');
       const eyeSelect = document.getElementById('eye-select');
       const typeSelect = document.getElementById('archetype-select');
-      const typeDescDisplay = document.getElementById('type-desc');
       const charaTypeDesc = ['',
       'An introverted character who becomes more expressive around someone they trust.'
       ,'A character who is consistently sweet, affectionate, and cheerful.'
@@ -214,9 +210,9 @@
         }     
       }
 
-      function displayTypeDesc() {
+      function displayTypeHelp() {
         const typeIndex = typeSelect.selectedIndex;
-        typeDescDisplay.innerHTML = charaTypeDesc[typeIndex];
+        document.getElementById('chara-type-help').innerHTML = charaTypeDesc[typeIndex];
       }
 
       function loadTasks() {
@@ -254,7 +250,7 @@
             hairSelect.value = data.chara[0].chara_hair;
             eyeSelect.value = data.chara[0].chara_eyes;
             typeSelect.value = data.chara[0].chara_type;
-            displayTypeDesc();
+            displayTypeHelp();
           }
         })
         .catch(error => {
@@ -329,8 +325,47 @@
 
       }
 
+      function getModalContent(taskDesc) {
+        const url = new URL('http://localhost:3000/openai/get');
+        url.search = new URLSearchParams({
+          "chara_name": charaName.value, 
+          "chara_hair": hairSelect.value,
+          "chara_eyes": eyeSelect.value,
+          "chara_type": typeSelect.value, 
+          "task_desc": taskDesc,
+        });
+
+        fetch(url.toString(),{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error('OpenAI response was not OK');
+          }
+          return response.json();
+        }).then(data => {
+            //console.log(data);
+
+            document.getElementById("chara-modal-text").innerHTML = data.text;
+            document.getElementById("chara-modal-img").src = data.image;
+
+            var charaModal = document.getElementById("chara-modal");
+            var charaModalPopup = new bootstrap.Modal(charaModal, {});
+            charaModalPopup.show();
+
+        }).catch(error => {
+          console.error('OpenAI GET error:', error);
+
+          document.getElementById("chara-modal-text").innerHTML = "";
+          document.getElementById("chara-modal-img").src = "";
+        });
+      }
+
       function markTaskAsClosedInDB(taskID) {
-        
+        const taskDesc = document.getElementById('task-desc'+taskID).innerHTML;
+
         fetch('http://localhost:3000/tasks/closed', {
           method: 'PATCH',
           headers: {
@@ -340,22 +375,19 @@
         })
         .then(response => {
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Task response was not OK');
           }
           return response.json();
         })
         .then(data => {
-          console.log(data);
 
-          var charaModal = document.getElementById("chara-modal");
-          var charaModalPopup = new bootstrap.Modal(charaModal, {});
-          charaModalPopup.show();
+          //console.log(data);
+          getModalContent(taskDesc);
 
         })
         .catch(error => {
           console.error('Task POST error:', error);
         });
-
       }
 
       function deleteTaskFromDB (taskID) {
@@ -397,22 +429,17 @@
 
         if(listItem != undefined) {
           if (event.target.tagName == 'INPUT') {     
-            setTimeout(function () {
 
-              markTaskAsClosedInDB(taskID);
+            markTaskAsClosedInDB(taskID);
 
-              const input = listItem.getElementsByTagName('input')[0];
-              input.disabled = true;
-              input.checked = true;
+            const input = listItem.getElementsByTagName('input')[0];
+            input.disabled = true;
+            input.checked = true;
+            const taskDesc = document.getElementById('task-desc'+taskID);
+            taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
+            insertIntoList(listItem, taskList);
+            listItem.setAttribute('data-task-status',1);
 
-              const taskDesc = document.getElementById('task-desc'+taskID);
-              taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
-
-              insertIntoList(listItem, taskList);
-
-              listItem.setAttribute('data-task-status',1);
-
-            }, 1000);
           } else if (event.target.tagName == 'SPAN') {
             deleteTaskFromDB(taskID);
             listItem.remove();
@@ -461,7 +488,7 @@
           return response.json();
         })
         .then(data => {
-          console.log(data);
+          //console.log(data);
           showOrHideSettingsSpace();
         })
         .catch(error => {
