@@ -37,12 +37,12 @@ router.get('/get', async function(req, res, next) {
     model: "dall-e-3", 
     n:1, 
     quality:'standard',  
-    response_format: 'url',
+    response_format: 'b64_json',
     size: '1024x1024',
     style: 'vivid'
   });
 
-  res.json({"text":chatCompletion.choices[0].message.content,"image":image.data[0].url});
+  res.json({"text":chatCompletion.choices[0].message.content,"image":image.data[0].b64_json});
 });
 
 module.exports = router;

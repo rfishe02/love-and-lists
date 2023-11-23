@@ -39,23 +39,14 @@ function createTables(db) {
         foreign key (chara_user) references users(user_id)
     );
 
-    create table events (
-        event_id primary key,
-        event_desc text,
-        event_date text not null,
-        chara_id integer not null,
-        chara_user integer not null,
-        foreign key (chara_id) references characters(chara_id),
-        foreign key (chara_user) references users(user_id)
-    );
-
     insert into users (user_id,user_name,user_password) 
         values (1,'Rosalind','password');
 
     insert into tasks (task_desc,task_status,task_user) 
-        values ('Do taxes.',0,1),
-               ('Buy milk.',0,1),
-               ('Do dishes.',0,1);
+        values ('Do laundry.',0,1),
+               ('Buy groceries.',0,1),
+               ('Clean kitchen.',0,1);
+
     `, (err) => {
         console.log(err);
     });

@@ -222,7 +222,7 @@
           return response.json();
         })
         .then(data => {
-          //console.log(data);
+          
           for(row in data.tasks) {
             const newElement = createNewTaskElement(data.tasks[row].task_id, data.tasks[row].task_desc, data.tasks[row].task_status);
             taskList.append(newElement);
@@ -344,20 +344,16 @@
           }
           return response.json();
         }).then(data => {
-            //console.log(data);
-
-            document.getElementById("chara-modal-img").src = data.image;
+            
+            document.getElementById("chara-modal-img").src = `data:image/jpeg;base64,${data.image}`;
             document.getElementById("chara-modal-text").innerHTML = `<div class="col-10" style="height: 175px; overflow: scroll;"><p>${data.text}</p></div>`;
 
-            setTimeout(function(){  
-              var charaModal = document.getElementById("chara-modal");
-              var charaModalPopup = new bootstrap.Modal(charaModal, {});
-              charaModalPopup.show();
-            },2000);
+            var charaModal = document.getElementById("chara-modal");
+            var charaModalPopup = new bootstrap.Modal(charaModal, {});
+            charaModalPopup.show();
 
         }).catch(error => {
           console.error('OpenAI GET error:', error);
-
           document.getElementById("chara-modal-text").innerHTML = "";
           document.getElementById("chara-modal-img").src = "";
         });
@@ -381,7 +377,6 @@
         })
         .then(data => {
 
-          //console.log(data);
           getModalContent(taskDesc);
 
         })
