@@ -28,6 +28,14 @@ function createTables(db) {
         foreign key (task_user) references users(user_id)
     );
 
+    create table rewards (
+        reward_id integer primary key,
+        reward_image_src text,
+        reward_paragraph text,
+        reward_user integer not null,
+        foreign key (reward_user) references users(user_id)
+    );
+
     create table characters (
         chara_id integer primary key,
         chara_name text not null,
