@@ -63,7 +63,22 @@
       </div>
     </nav>
 
-    <div class="modal" id="chara-modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="reward-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <!--<img src="..." class="rounded me-2" alt="...">-->
+          <div class="me-2" style="color: black; font-size: 12pt;">&hearts;</div>
+          <strong class="me-auto">New Reward</strong>
+          <!--<small>11 mins ago</small>-->
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          You have a new reward to view!
+        </div>
+      </div>
+    </div>
+
+    <div id="chara-modal" class="modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -81,6 +96,16 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-sm btn-secondary shadow-sm" data-bs-dismiss="modal">Close</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rewards-space" class="container pt-3" style="display: none;">
+      <div class="row justify-content-center">
+        <div class="col-10 col-md-6">
+
+          
+
         </div>
       </div>
     </div>
@@ -160,20 +185,7 @@
     </div>
 
     <script>
-      const taskForm = document.getElementById('new-task-form');
-      const taskList = document.getElementById('task-list');
-      const settingsButton = document.getElementById('settings-button');
-      const charaForm = document.getElementById('chara-edit-form');
-      const charaName = document.getElementById('chara-name');
-      const hairSelect = document.getElementById('hair-select');
-      const eyeSelect = document.getElementById('eye-select');
-      const typeSelect = document.getElementById('archetype-select');
-      const charaTypeDesc = ['',
-      'An introverted character who becomes more expressive around someone they trust.'
-      ,'A character who is consistently sweet, affectionate, and cheerful.'
-      ,'A character that is outwardly aloof but secretly compassionate.'
-      ,'A character who playfully teases others.'
-      ,'A character that starts off as cold and aloof but later become warm and affectionate.'];
+      
 
       function appSetup() {
         buildSettingsForm();
@@ -182,6 +194,10 @@
       }
 
       function buildSettingsForm() {
+        const hairSelect = document.getElementById('hair-select');
+        const eyeSelect = document.getElementById('eye-select');
+        const typeSelect = document.getElementById('archetype-select');
+
         hairColors = ['Black','Blonde','Brown','Red','White'];
         eyeColors = ['Blue','Brown','Green','Gray','Hazel'];
         charaTypes = ['Dandere','Deredere','Kuudere','Teasedere','Tsundere'];
@@ -209,7 +225,15 @@
       }
 
       function displayTypeHelp() {
-        const typeIndex = typeSelect.selectedIndex;
+        const charaTypeDesc = ['',
+          'An introverted character who becomes more expressive around someone they trust.'
+          ,'A character who is consistently sweet, affectionate, and cheerful.'
+          ,'A character that is outwardly aloof but secretly compassionate.'
+          ,'A character who playfully teases others.'
+          ,'A character that starts off as cold and aloof but later become warm and affectionate.'
+        ];
+        const typeIndex = document.getElementById('archetype-select').selectedIndex;
+
         document.getElementById('chara-type-help').innerHTML = charaTypeDesc[typeIndex];
       }
 
@@ -222,7 +246,8 @@
           return response.json();
         })
         .then(data => {
-          
+          const taskList = document.getElementById('task-list');
+
           for(row in data.tasks) {
             const newElement = createNewTaskElement(data.tasks[row].task_id, data.tasks[row].task_desc, data.tasks[row].task_status);
             taskList.append(newElement);
@@ -243,6 +268,11 @@
           return response.json();
         })
         .then(data => {
+          const charaName = document.getElementById('chara-name');
+          const hairSelect = document.getElementById('hair-select');
+          const eyeSelect = document.getElementById('eye-select');
+          const typeSelect = document.getElementById('archetype-select');
+
           if (data.chara.length > 0) {
             charaName.value = data.chara[0].chara_name;
             hairSelect.value = data.chara[0].chara_hair;
@@ -312,6 +342,7 @@
           return response.json();
         })
         .then(data => {
+          const taskList = document.getElementById('task-list');
 
           const newElement = createNewTaskElement(data.task_id, taskDescription, 0);
           insertIntoList(newElement, taskList);
@@ -323,7 +354,18 @@
 
       }
 
-      function getModalContent(taskDesc) {
+      function showRewardToast() {
+        const rewardToast = document.getElementById('reward-toast');
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(rewardToast);
+        toastBootstrap.show();
+      }
+
+      function generateRewardContent(taskDesc) {
+        const charaName = document.getElementById('chara-name');
+        const hairSelect = document.getElementById('hair-select');
+        const eyeSelect = document.getElementById('eye-select');
+        const typeSelect = document.getElementById('archetype-select');
+
         const url = new URL('http://localhost:3000/openai/get');
         url.search = new URLSearchParams({
           "chara_name": charaName.value, 
@@ -345,12 +387,18 @@
           return response.json();
         }).then(data => {
             
-            document.getElementById("chara-modal-img").src = `data:image/jpeg;base64,${data.image}`;
+            /*document.getElementById("chara-modal-img").src = `data:image/jpeg;base64,${data.image}`;
             document.getElementById("chara-modal-text").innerHTML = `<div class="col-10" style="height: 175px; overflow: scroll;"><p>${data.text}</p></div>`;
 
             var charaModal = document.getElementById("chara-modal");
             var charaModalPopup = new bootstrap.Modal(charaModal, {});
-            charaModalPopup.show();
+            charaModalPopup.show();*/
+
+            // Add to story or reward screen.
+
+            // Show popup & add notification to reward button.
+
+            showRewardToast();
 
         }).catch(error => {
           console.error('OpenAI GET error:', error);
@@ -377,7 +425,7 @@
         })
         .then(data => {
 
-          getModalContent(taskDesc);
+          generateRewardContent(taskDesc);
 
         })
         .catch(error => {
@@ -409,18 +457,19 @@
 
       }
 
-      taskForm.addEventListener('submit', function(event) {
+      document.getElementById('new-task-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
         const taskDesc = document.getElementById('new-task-input').value;
         addTaskToDB(taskDesc);
 
-        taskForm.reset();
+        event.target.reset();
       });
 
-      taskList.addEventListener('click', function(event){
+      document.getElementById('task-list').addEventListener('click', function(event){
         const listItem = event.target.closest('li');
         const taskID = listItem.getAttribute('data-task-id');
+        const taskList = document.getElementById('task-list');
 
         if(listItem != undefined) {
           if (event.target.tagName == 'INPUT') {     
@@ -432,6 +481,7 @@
             input.checked = true;
             const taskDesc = document.getElementById('task-desc'+taskID);
             taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
+
             insertIntoList(listItem, taskList);
             listItem.setAttribute('data-task-status',1);
 
@@ -443,9 +493,13 @@
 
       });
 
-      settingsButton.addEventListener('click', function(event){
+      document.getElementById('settings-button').addEventListener('click', function(event){
         showOrHideSettingsSpace();
       });
+
+      function hideOrShowRewardsSpace() {
+        
+      }
 
       function showOrHideSettingsSpace() {
         const settingsSpace = document.getElementById('settings-space');
@@ -460,7 +514,7 @@
         }
       }
 
-      charaForm.addEventListener('submit', function(event) {
+      document.getElementById('chara-edit-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
         const formData = new FormData(event.target);
