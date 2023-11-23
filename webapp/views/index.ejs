@@ -29,6 +29,11 @@
         background-color: white; 
         height: 100%; 
       }
+
+      #rewards-space {
+        background-color: white; 
+        height: 100%; 
+      }
       
       #settings-button:hover {
         cursor: pointer;
@@ -56,10 +61,36 @@
 
     <nav id="main-navbar" class="navbar shadow-sm">
       <div class="container-fluid">
-        <a class="navbar-brand" style="color: black; font-size: 12pt;">&hearts; Love & Lists</a>
-        <svg id="settings-button" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
-          <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-        </svg>
+        <a class="navbar-brand" style="color: black;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+            <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1"/>
+          </svg>
+          Love & Lists
+        </a>
+        
+        <div>
+          <button id="tasks-button" type="button" class="btn btn-dark btn-sm position-relative me-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square" viewBox="0 0 16 16">
+              <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5z"/>
+              <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0"/>
+            </svg>
+          </button>
+          
+          <button id="rewards-button" type="button" class="btn btn-dark btn-sm position-relative me-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+              <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1"/>
+            </svg>
+            <span id="rewards-badge" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle" style="display: none;">
+              <span class="visually-hidden">New alerts</span>
+            </span>
+          </button>
+
+          <button id="settings-button" type="button" class="btn btn-dark btn-sm position-relative me-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+              <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </nav>
 
@@ -67,7 +98,11 @@
       <div id="reward-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
           <!--<img src="..." class="rounded me-2" alt="...">-->
-          <div class="me-2" style="color: black; font-size: 12pt;">&hearts;</div>
+          <div class="me-2" style="color: black;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+              <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1"/>
+            </svg>
+          </div>
           <strong class="me-auto">New Reward</strong>
           <!--<small>11 mins ago</small>-->
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -102,7 +137,7 @@
 
     <div id="rewards-space" class="container pt-3" style="display: none;">
       <div class="row justify-content-center">
-        <div class="col-10 col-md-6">
+        <div class="col-12 col-md-6">
 
           
 
@@ -113,7 +148,7 @@
     <div id="settings-space" class="container pt-3" style="display: none;">
 
       <div class="row justify-content-center">
-        <div class="col-10 col-md-6">
+        <div class="col-12 col-md-6">
 
           <h5>Character Settings</h5>
           <form id="chara-edit-form">
@@ -397,8 +432,10 @@
             // Add to story or reward screen.
 
             // Show popup & add notification to reward button.
-
             showRewardToast();
+            document.getElementById("rewards-badge").style.display = "block";
+
+            
 
         }).catch(error => {
           console.error('OpenAI GET error:', error);
@@ -493,26 +530,39 @@
 
       });
 
-      document.getElementById('settings-button').addEventListener('click', function(event){
-        showOrHideSettingsSpace();
+      document.getElementById('tasks-button').addEventListener('click', function(event){
+        showTasksSpace();
       });
 
-      function hideOrShowRewardsSpace() {
-        
-      }
-
-      function showOrHideSettingsSpace() {
+      function showTasksSpace() {
+        const tasksSpace = document.getElementById('tasks-space');
+        const rewardsSpace = document.getElementById('rewards-space');
         const settingsSpace = document.getElementById('settings-space');
-        const tasksSpace = document.getElementById('tasks-space'); 
 
-        if(settingsSpace.style.display == 'none') {
-          settingsSpace.style.display = 'block';
-          tasksSpace.style.display = 'none';
-        } else {
-          settingsSpace.style.display = 'none';
-          tasksSpace.style.display = 'block';
-        }
+        tasksSpace.style.display = 'block';
+        rewardsSpace.style.display = 'none';
+        settingsSpace.style.display = 'none';
       }
+
+      document.getElementById('rewards-button').addEventListener('click', function(event){
+        const tasksSpace = document.getElementById('tasks-space');
+        const rewardsSpace = document.getElementById('rewards-space');
+        const settingsSpace = document.getElementById('settings-space');
+              
+        rewardsSpace.style.display = 'block';
+        tasksSpace.style.display = 'none';
+        settingsSpace.style.display = 'none';
+      });
+
+      document.getElementById('settings-button').addEventListener('click', function(event){
+        const tasksSpace = document.getElementById('tasks-space');
+        const rewardsSpace = document.getElementById('rewards-space');
+        const settingsSpace = document.getElementById('settings-space'); 
+
+        settingsSpace.style.display = 'block';
+        rewardsSpace.style.display = 'none';
+        tasksSpace.style.display = 'none';
+      });
 
       document.getElementById('chara-edit-form').addEventListener('submit', function(event) {
         event.preventDefault();
@@ -538,7 +588,7 @@
         })
         .then(data => {
           //console.log(data);
-          showOrHideSettingsSpace();
+          showTasksSpace();
         })
         .catch(error => {
           console.error('Task POST error:', error);
