@@ -269,7 +269,7 @@
       }
 
       function loadTasks() {
-        fetch('http://localhost:3000/tasks/get?user_id=1')
+        fetch(window.location.origin + '/tasks/get?user_id=1')
         .then(response => {
           if (!response.ok) {
             throw new Error('Task response was not OK');
@@ -291,7 +291,7 @@
       };
 
       function loadChara() {
-        fetch('http://localhost:3000/chara/get?chara_id=1&user_id=1')
+        fetch(window.location.origin + '/chara/get?chara_id=1&user_id=1')
         .then(response => {
           if (!response.ok) {
             throw new Error('Chara response was not OK');
@@ -359,7 +359,7 @@
 
       function addTaskToDB(taskDescription) {
 
-        fetch('http://localhost:3000/tasks/create', {
+        fetch(window.location.origin + '/tasks/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -397,7 +397,7 @@
         const eyeSelect = document.getElementById('eye-select');
         const typeSelect = document.getElementById('archetype-select');
 
-        const url = new URL('http://localhost:3000/openai/get');
+        const url = new URL(window.location.origin + '/openai/get');
         url.search = new URLSearchParams({
           "chara_name": charaName.value, 
           "chara_hair": hairSelect.value,
@@ -413,6 +413,7 @@
           },
         }).then(response => {
           if (!response.ok) {
+            console.log(response)
             throw new Error('OpenAI response was not OK');
           }
           return response.json();
@@ -443,7 +444,7 @@
       function markTaskAsClosedInDB(taskID) {
         const taskDesc = document.getElementById('task-desc'+taskID).innerHTML;
 
-        fetch('http://localhost:3000/tasks/closed', {
+        fetch(window.location.origin + '/tasks/closed', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -468,7 +469,7 @@
 
       function deleteTaskFromDB (taskID) {
 
-        fetch('http://localhost:3000/tasks/delete', {
+        fetch(window.location.origin + '/tasks/delete', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -569,7 +570,7 @@
 
         const json = JSON.stringify(Object.fromEntries(formData));
  
-        fetch('http://localhost:3000/chara/update', {
+        fetch(window.location.origin + '/chara/update', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
