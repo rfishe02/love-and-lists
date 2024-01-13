@@ -413,7 +413,6 @@
           },
         }).then(response => {
           if (!response.ok) {
-            console.log(response)
             throw new Error('OpenAI response was not OK');
           }
           return response.json();
@@ -428,11 +427,11 @@
 
             // Add to story or reward screen.
 
+
+
             // Show popup & add notification to reward button.
             showRewardToast();
             document.getElementById("rewards-badge").style.display = "block";
-
-            
 
         }).catch(error => {
           console.error('OpenAI GET error:', error);
@@ -549,6 +548,8 @@
         rewardsSpace.style.display = 'block';
         tasksSpace.style.display = 'none';
         settingsSpace.style.display = 'none';
+
+        document.getElementById('rewards-badge').style.display = 'none';
       });
 
       document.getElementById('settings-button').addEventListener('click', function(event){
