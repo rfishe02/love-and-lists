@@ -15,8 +15,8 @@ function createTables(db) {
     db.exec(`
     create table users (
         user_id integer primary key,
-        user_name text not null,
-        user_email text,
+        user_name text,
+        user_email text unique not null,
         user_password text not null
     );
 
@@ -52,16 +52,6 @@ function createTables(db) {
         chara_user integer not null,
         foreign key (chara_user) references users(user_id)
     );
-
-    insert into users (user_id,user_name,user_password) 
-        values (1,'Rosalind','password');
-
-    insert into tasks (task_desc,task_created,task_done,task_used,task_user) 
-        values ('Do laundry.',unixepoch(),0,0,1),
-               ('Buy groceries.',unixepoch(),0,0,1),
-               ('Clean kitchen.',unixepoch(),0,0,1);
-
-    insert into characters (chara_name,chara_archetype,chara_eyes,chara_hair,chara_bond,chara_user) values ('Nicholas','Tsundere','Green','Brown',0,1);
 
     `, (err) => {
         console.log(err);
