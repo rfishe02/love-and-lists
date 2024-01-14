@@ -1,9 +1,3 @@
-function appSetup() {
-  buildSettingsForm();
-  loadTasks();
-  loadChara();
-}
-
 function buildSettingsForm() {
   const hairSelect = document.getElementById("hair-select");
   const eyeSelect = document.getElementById("eye-select");
@@ -35,23 +29,8 @@ function buildSettingsForm() {
   }
 }
 
-function displayTypeHelp() {
-  const charaTypeDesc = [
-    "",
-    "An introverted character who becomes more expressive around someone they trust.",
-    "A character who is consistently sweet, affectionate, and cheerful.",
-    "A character that is outwardly aloof but secretly compassionate.",
-    "A character who playfully teases others.",
-    "A character that starts off as cold and aloof but later become warm and affectionate.",
-  ];
-  const typeIndex = document.getElementById("archetype-select").selectedIndex;
-
-  document.getElementById("chara-type-help").innerHTML =
-    charaTypeDesc[typeIndex];
-}
-
-function loadTasks() {
-  fetch(window.location.origin + "/tasks/get?user_id=1")
+function loadTasks(user_id) {
+  fetch(window.location.origin + "/tasks/get?user_id=" + user_id)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Task response was not OK");
@@ -75,8 +54,35 @@ function loadTasks() {
     });
 }
 
-function loadChara() {
-  fetch(window.location.origin + "/chara/get?chara_id=1&user_id=1")
+function displayTypeHelp() {
+  const charaTypeDesc = [
+    "",
+    "An introverted character who becomes more expressive around someone they trust.",
+    "A character who is consistently sweet, affectionate, and cheerful.",
+    "A character that is outwardly aloof but secretly compassionate.",
+    "A character who playfully teases others.",
+    "A character that starts off as cold and aloof but later become warm and affectionate.",
+  ];
+  const typeIndex = document.getElementById("archetype-select").selectedIndex;
+
+  document.getElementById("chara-type-help").innerHTML =
+    charaTypeDesc[typeIndex];
+}
+
+function loadChara(user_id) {
+  const charaName = document.getElementById("chara-name");
+  const hairSelect = document.getElementById("hair-select");
+  const eyeSelect = document.getElementById("eye-select");
+  const typeSelect = document.getElementById("archetype-select");
+
+  // TODO: Think of better way to load default characters.
+  charaName.value = "Nicholas";
+  hairSelect.value = "Brown";
+  eyeSelect.value = "Green";
+  typeSelect.value = "Tsundere";
+  displayTypeHelp();
+
+  fetch(window.location.origin + "/chara/get?chara_id=1&user_id=" + user_id)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Chara response was not OK");
@@ -84,11 +90,6 @@ function loadChara() {
       return response.json();
     })
     .then((data) => {
-      const charaName = document.getElementById("chara-name");
-      const hairSelect = document.getElementById("hair-select");
-      const eyeSelect = document.getElementById("eye-select");
-      const typeSelect = document.getElementById("archetype-select");
-
       if (data.chara.length > 0) {
         charaName.value = data.chara[0].chara_name;
         hairSelect.value = data.chara[0].chara_hair;
@@ -100,6 +101,34 @@ function loadChara() {
     .catch((error) => {
       console.error("Task GET error:", error);
     });
+}
+
+function showTasksSpace() {
+  const tasksSpace = document.getElementById("tasks-space");
+  const rewardsSpace = document.getElementById("rewards-space");
+  const settingsSpace = document.getElementById("settings-space");
+
+  tasksSpace.style.display = "block";
+  rewardsSpace.style.display = "none";
+  settingsSpace.style.display = "none";
+}
+
+function insertIntoList(item, list) {
+  var firstComplete = null;
+
+  for (var i = 0; i < list.children.length; i++) {
+    if (list.children[i].getAttribute("data-task-done") == 1) {
+      firstComplete = list.children[i];
+      break;
+    }
+  }
+
+  if (firstComplete !== null) {
+    item.remove();
+    list.insertBefore(item, firstComplete);
+  } else {
+    list.append(item);
+  }
 }
 
 function createNewTaskElement(taskID, taskDescription, taskDone) {
@@ -127,31 +156,13 @@ function createNewTaskElement(taskID, taskDescription, taskDone) {
   return newTask;
 }
 
-function insertIntoList(item, list) {
-  var firstComplete = null;
-
-  for (var i = 0; i < list.children.length; i++) {
-    if (list.children[i].getAttribute("data-task-done") == 1) {
-      firstComplete = list.children[i];
-      break;
-    }
-  }
-
-  if (firstComplete !== null) {
-    item.remove();
-    list.insertBefore(item, firstComplete);
-  } else {
-    list.append(item);
-  }
-}
-
-function addTaskToDB(taskDescription) {
+function addTaskToDB(user_id, taskDescription) {
   fetch(window.location.origin + "/tasks/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ task_desc: taskDescription, user_id: "1" }), // TODO: User management.
+    body: JSON.stringify({ task_desc: taskDescription, user_id: user_id }),
   })
     .then((response) => {
       if (!response.ok) {
@@ -170,13 +181,59 @@ function addTaskToDB(taskDescription) {
     });
 }
 
+function markTaskAsClosedInDB(user_id, taskID) {
+  const taskDesc = document.getElementById("task-desc" + taskID).innerHTML;
+
+  fetch(window.location.origin + "/tasks/closed", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ task_id: taskID, user_id: user_id }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Task response was not OK");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      generateRewardContent(user_id, taskDesc);
+    })
+    .catch((error) => {
+      console.error("Task POST error:", error);
+    });
+}
+
+function deleteTaskFromDB(user_id, taskID) {
+  fetch(window.location.origin + "/tasks/delete", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ task_id: taskID, user_id: user_id }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      //console.log(data);
+    })
+    .catch((error) => {
+      console.error("Task POST error:", error);
+    });
+}
+
 function showRewardToast() {
   const rewardToast = document.getElementById("reward-toast");
   const toastBootstrap = bootstrap.Toast.getOrCreateInstance(rewardToast);
   toastBootstrap.show();
 }
 
-async function generateRewardContent(taskDesc) {
+async function generateRewardContent(user_id, taskDesc) {
   const charaName = document.getElementById("chara-name");
   const hairSelect = document.getElementById("hair-select");
   const eyeSelect = document.getElementById("eye-select");
@@ -184,7 +241,7 @@ async function generateRewardContent(taskDesc) {
 
   // Save rewards content.
   const formData = new FormData();
-  formData.append("user_id", "1");
+  formData.append("user_id", user_id);
   formData.append("chara_name", charaName.value);
   formData.append("chara_hair", hairSelect.value);
   formData.append("chara_eyes", eyeSelect.value);
@@ -248,16 +305,13 @@ async function generateRewardContent(taskDesc) {
     });*/
 }
 
-function markTaskAsClosedInDB(taskID) {
-  const taskDesc = document.getElementById("task-desc" + taskID).innerHTML;
+function showRewards(user_id) {
+  const tasksSpace = document.getElementById("tasks-space");
+  const rewardsSpace = document.getElementById("rewards-space");
+  const settingsSpace = document.getElementById("settings-space");
+  const rewardCardGrid = document.getElementById("reward-card-grid");
 
-  fetch(window.location.origin + "/tasks/closed", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ task_id: taskID, user_id: "1" }), // TODO: User management.
-  })
+  fetch(window.location.origin + "/rewards/get?user_id=" + user_id)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Task response was not OK");
@@ -265,206 +319,64 @@ function markTaskAsClosedInDB(taskID) {
       return response.json();
     })
     .then((data) => {
-      generateRewardContent(taskDesc);
+      const rewards = data.rewards;
+      for (var i = 0; i < rewards.length; i++) {
+        const cardCol = document.createElement("div");
+        const card = document.createElement("div");
+        const cardBody = document.createElement("div");
+
+        cardCol.setAttribute("class", "col");
+        card.setAttribute("class", "card shadow");
+        cardBody.setAttribute("class", "card-body m-1");
+
+        cardCol.append(card);
+        card.append(cardBody);
+
+        if (rewards[i].reward_paragraph.length > 0) {
+          cardBody.innerHTML = `<p class="card-text" style="height: 175px; overflow: scroll;">${rewards[i].reward_paragraph}</p>`;
+        }
+
+        if (rewards[i].reward_filename.length > 0) {
+          fetch(
+            window.location.origin +
+              "/images/get?user_id=" +
+              user_id +
+              "&filename=" +
+              rewards[i].reward_filename
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Task response was not OK");
+              }
+              return response.blob();
+            })
+            .then((data) => {
+              const imageURL = URL.createObjectURL(data);
+              const imgElement = document.createElement("img");
+              imgElement.setAttribute("class", "card-img-top");
+              imgElement.setAttribute(
+                "style",
+                "height: 275px; object-fit: cover;"
+              );
+              imgElement.src = imageURL;
+
+              card.prepend(imgElement);
+            })
+            .catch((error) => {
+              console.error("Task GET error:", error);
+            });
+        }
+
+        rewardCardGrid.append(cardCol);
+      }
+
+      rewardsSpace.style.display = "block";
+      tasksSpace.style.display = "none";
+      settingsSpace.style.display = "none";
+
+      document.getElementById("rewards-badge").style.display = "none";
     })
     .catch((error) => {
-      console.error("Task POST error:", error);
+      console.error("Task GET error:", error);
     });
 }
-
-function deleteTaskFromDB(taskID) {
-  fetch(window.location.origin + "/tasks/delete", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ task_id: taskID, user_id: "1" }), // TODO: User management.
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      //console.log(data);
-    })
-    .catch((error) => {
-      console.error("Task POST error:", error);
-    });
-}
-
-document
-  .getElementById("new-task-form")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const taskDesc = document.getElementById("new-task-input").value;
-    addTaskToDB(taskDesc);
-
-    event.target.reset();
-  });
-
-document
-  .getElementById("task-list")
-  .addEventListener("click", function (event) {
-    const listItem = event.target.closest("li");
-    const taskID = listItem.getAttribute("data-task-id");
-    const taskList = document.getElementById("task-list");
-
-    if (listItem != undefined) {
-      if (event.target.tagName == "INPUT") {
-        markTaskAsClosedInDB(taskID);
-
-        const input = listItem.getElementsByTagName("input")[0];
-        input.disabled = true;
-        input.checked = true;
-        const taskDesc = document.getElementById("task-desc" + taskID);
-        taskDesc.innerHTML = `<s>${taskDesc.innerHTML}</s>`;
-
-        insertIntoList(listItem, taskList);
-        listItem.setAttribute("data-task-done", 1);
-      } else if (event.target.tagName == "SPAN") {
-        deleteTaskFromDB(taskID);
-        listItem.remove();
-      }
-    }
-  });
-
-document
-  .getElementById("tasks-button")
-  .addEventListener("click", function (event) {
-    showTasksSpace();
-  });
-
-function showTasksSpace() {
-  const tasksSpace = document.getElementById("tasks-space");
-  const rewardsSpace = document.getElementById("rewards-space");
-  const settingsSpace = document.getElementById("settings-space");
-
-  tasksSpace.style.display = "block";
-  rewardsSpace.style.display = "none";
-  settingsSpace.style.display = "none";
-}
-
-document
-  .getElementById("rewards-button")
-  .addEventListener("click", function (event) {
-    const tasksSpace = document.getElementById("tasks-space");
-    const rewardsSpace = document.getElementById("rewards-space");
-    const settingsSpace = document.getElementById("settings-space");
-
-    const rewardCardGrid = document.getElementById("reward-card-grid");
-    fetch(window.location.origin + "/rewards/get?user_id=1")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Task response was not OK");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const rewards = data.rewards;
-        for (var i = 0; i < rewards.length; i++) {
-          const cardCol = document.createElement("div");
-          const card = document.createElement("div");
-          const cardBody = document.createElement("div");
-
-          cardCol.setAttribute("class", "col");
-          card.setAttribute("class", "card shadow");
-          cardBody.setAttribute("class", "card-body m-1");
-
-          cardCol.append(card);
-          card.append(cardBody);
-
-          if (rewards[i].reward_paragraph.length > 0) {
-            cardBody.innerHTML = `<p class="card-text" style="height: 175px; overflow: scroll;">${rewards[i].reward_paragraph}</p>`;
-          }
-
-          if (rewards[i].reward_filename.length > 0) {
-            fetch(
-              window.location.origin +
-                "/images/get?user_id=1" +
-                "&filename=" +
-                rewards[i].reward_filename
-            )
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error("Task response was not OK");
-                }
-                return response.blob();
-              })
-              .then((data) => {
-                const imageURL = URL.createObjectURL(data);
-                const imgElement = document.createElement("img");
-                imgElement.setAttribute("class", "card-img-top");
-                imgElement.setAttribute(
-                  "style",
-                  "height: 275px; object-fit: cover;"
-                );
-                imgElement.src = imageURL;
-
-                card.prepend(imgElement);
-              })
-              .catch((error) => {
-                console.error("Task GET error:", error);
-              });
-          }
-
-          rewardCardGrid.append(cardCol);
-        }
-
-        rewardsSpace.style.display = "block";
-        tasksSpace.style.display = "none";
-        settingsSpace.style.display = "none";
-
-        document.getElementById("rewards-badge").style.display = "none";
-      })
-      .catch((error) => {
-        console.error("Task GET error:", error);
-      });
-  });
-
-document
-  .getElementById("settings-button")
-  .addEventListener("click", function (event) {
-    const tasksSpace = document.getElementById("tasks-space");
-    const rewardsSpace = document.getElementById("rewards-space");
-    const settingsSpace = document.getElementById("settings-space");
-
-    settingsSpace.style.display = "block";
-    rewardsSpace.style.display = "none";
-    tasksSpace.style.display = "none";
-  });
-
-document
-  .getElementById("chara-edit-form")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    formData.append("chara_id", "1");
-    formData.append("user_id", "1"); // TODO: User management.
-
-    const json = JSON.stringify(Object.fromEntries(formData));
-
-    fetch(window.location.origin + "/chara/update", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: json,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Chara response was not OK");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        //console.log(data);
-        showTasksSpace();
-      })
-      .catch((error) => {
-        console.error("Task POST error:", error);
-      });
-  });
