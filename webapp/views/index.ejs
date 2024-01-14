@@ -113,11 +113,11 @@
       </div>
     </div>
 
+    <!--
     <div id="chara-modal" class="modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <!--<h1 class="modal-title fs-5" id="chara-modal-label">Modal title</h1>-->
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -133,11 +133,13 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
 
     <div id="rewards-space" class="container pt-3" style="display: none;">
 
-      
+      <div id="reward-card-grid" class="row row-cols-1 row-cols-md-2 g-1">
+        
+      </div>
       
     </div>
 
@@ -565,12 +567,69 @@
         const tasksSpace = document.getElementById('tasks-space');
         const rewardsSpace = document.getElementById('rewards-space');
         const settingsSpace = document.getElementById('settings-space');
-              
-        rewardsSpace.style.display = 'block';
-        tasksSpace.style.display = 'none';
-        settingsSpace.style.display = 'none';
 
-        document.getElementById('rewards-badge').style.display = 'none';
+        // Get rewards.
+        const rewardCardGrid = document.getElementById('reward-card-grid');
+        fetch(window.location.origin + '/rewards/get?user_id=1')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Task response was not OK');
+          }
+          return response.json();
+        })
+        .then(data => {
+          
+          const rewards = data.rewards;
+          for(var i = 0; i < rewards.length; i++) {
+            const cardCol = document.createElement('div');
+            const card = document.createElement('div');
+            const cardBody = document.createElement('div');
+
+            cardCol.setAttribute('class','col');
+            card.setAttribute('class','card shadow');
+            cardBody.setAttribute('class','card-body m-1');
+
+            cardCol.append(card);
+            card.append(cardBody);
+
+            if(rewards[i].reward_paragraph.length > 0) {
+              cardBody.innerHTML = `<p class="card-text" style="height: 175px; overflow: scroll;">${rewards[i].reward_paragraph}</p>`;
+            }
+            
+            if(rewards[i].reward_filename.length > 0) {
+              fetch(window.location.origin + '/images/get?user_id=1'+'&filename='+rewards[i].reward_filename)
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('Task response was not OK');
+                  }
+                  return response.blob();
+                }).then(data => {
+                  const imageURL = URL.createObjectURL(data);
+                  const imgElement = document.createElement('img');
+                  imgElement.setAttribute('class','card-img-top');
+                  imgElement.setAttribute('style','height: 275px; object-fit: cover;');
+                  imgElement.src = imageURL;
+  
+                  card.prepend(imgElement);
+                }).catch(error => {
+                  console.error('Task GET error:', error);
+                });
+            }
+ 
+            rewardCardGrid.append(cardCol);
+          }
+
+          rewardsSpace.style.display = 'block';
+          tasksSpace.style.display = 'none';
+          settingsSpace.style.display = 'none';
+
+          document.getElementById('rewards-badge').style.display = 'none';
+
+        })
+        .catch(error => {
+          console.error('Task GET error:', error);
+        });
+              
       });
 
       document.getElementById('settings-button').addEventListener('click', function(event){
