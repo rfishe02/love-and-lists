@@ -23,15 +23,21 @@ function createTables(db) {
     create table tasks (
         task_id integer primary key,
         task_desc text not null,
-        task_status integer not null,
+        task_created integer not null,
+        task_completed integer,
+        task_done integer not null,
+        task_used integer not null,
         task_user integer not null,
         foreign key (task_user) references users(user_id)
     );
 
     create table rewards (
         reward_id integer primary key,
-        reward_image_src text,
+        reward_date date not null,
+        reward_context text,
+        reward_filename text not null,
         reward_paragraph text,
+        reward_seen integer not null,
         reward_user integer not null,
         foreign key (reward_user) references users(user_id)
     );
@@ -50,10 +56,12 @@ function createTables(db) {
     insert into users (user_id,user_name,user_password) 
         values (1,'Rosalind','password');
 
-    insert into tasks (task_desc,task_status,task_user) 
-        values ('Do laundry.',0,1),
-               ('Buy groceries.',0,1),
-               ('Clean kitchen.',0,1);
+    insert into tasks (task_desc,task_created,task_done,task_used,task_user) 
+        values ('Do laundry.',unixepoch(),0,0,1),
+               ('Buy groceries.',unixepoch(),0,0,1),
+               ('Clean kitchen.',unixepoch(),0,0,1);
+
+    insert into characters (chara_name,chara_archetype,chara_eyes,chara_hair,chara_bond,chara_user) values ('Nicholas','Tsundere','Green','Brown',0,1);
 
     `, (err) => {
         console.log(err);

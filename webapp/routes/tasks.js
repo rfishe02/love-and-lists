@@ -9,13 +9,16 @@ router.get('/get', function(req, res, next) {
     const data = {"tasks":[],"status":""};
 
     db.serialize(() => {
-        db.all(`select * from tasks where task_user = ? order by task_status asc, task_id asc`,userID, (err, rows) => {
+        db.all(`select * from tasks where task_user = ? order by task_done asc, task_created asc`,userID, (err, rows) => {
             if(rows !== undefined) {
                 rows.forEach(row => {
                     var task = {};
                     task["task_id"] = row["task_id"];
                     task["task_desc"] = row["task_desc"];
-                    task["task_status"] = row["task_status"];
+                    task["task_created"] = row["task_created"];
+                    task["task_completed"] = row["task_completed"];
+                    task["task_done"] = row["task_done"];
+                    task["task_used"] = row["task_used"];
 
                     data["tasks"].push(task);
                 });
@@ -33,12 +36,13 @@ router.get('/get', function(req, res, next) {
 router.post('/create', function(req, res, next) {
     const userID = req.body.user_id;
     const taskDesc = req.body.task_desc;
+    const taskDate = Date.now();
 
     const db = new sqlite3.Database('./webapp.db');
 
     db.serialize(() => {
-        const stmt = db.prepare(`insert into tasks (task_desc,task_status,task_user) values (?,0,?)`);
-        stmt.run(taskDesc,userID, (err) =>{
+        const stmt = db.prepare(`insert into tasks (task_desc,task_created,task_done,task_used,task_user) values (?,?,0,0,?)`);
+        stmt.run(taskDesc,taskDate,userID, (err) =>{
             if(err === null) {       
 
                 const taskID = stmt.lastID;
@@ -47,7 +51,7 @@ router.post('/create', function(req, res, next) {
                 res.json({"task_id":taskID});
 
             } else {
-                console.log("TASK REATE ERROR: "+err); // TODO: Error logging
+                console.log("TASK CREATE ERROR: "+err); // TODO: Error logging
                 return;
             }
         });
@@ -62,12 +66,13 @@ router.patch('/open', function(req, res, next) {
 router.patch('/closed', function(req, res, next) {
     const taskID = req.body.task_id;
     const userID = req.body.user_id;
+    const taskDate = Date.now();
 
     const db = new sqlite3.Database('./webapp.db');
 
     db.serialize(() => {
-        const stmt = db.prepare(`update tasks set task_status = 1 where task_id = ? and task_user = ?`);
-        stmt.run(taskID,userID, (err) =>{
+        const stmt = db.prepare(`update tasks set task_completed = ?, task_done = 1 where task_id = ? and task_user = ?`);
+        stmt.run(taskDate,taskID,userID, (err) =>{
             if(err === null) {       
 
                 stmt.finalize();

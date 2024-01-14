@@ -2,4 +2,5 @@
 /webapp/node_modules
 /webapp/.env
 /webapp/*.db
-/webapp/public/images/*
+/webapp/public/images/coffee_man.png
+/webapp/uploads/

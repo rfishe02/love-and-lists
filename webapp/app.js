@@ -8,6 +8,7 @@ var indexRouter = require('./routes/index');
 var openAIRouter = require('./routes/openai');
 var tasksRouter = require('./routes/tasks');
 var charaRouter = require('./routes/chara');
+var rewardRouter = require('./routes/rewards');
 
 var app = express();
 
@@ -25,6 +26,7 @@ app.use('/', indexRouter);
 app.use('/openai', openAIRouter);
 app.use('/tasks', tasksRouter);
 app.use('/chara', charaRouter);
+app.use('/rewards',rewardRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
