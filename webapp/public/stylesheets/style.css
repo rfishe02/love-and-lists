@@ -1,1 +1,40 @@
+html {
+  height: 100%;
+  width: 100%;
+}
 
+body {
+  height: 100%;
+  background-color: #ffd1e8;
+  font: Helvetica, sans-serif;
+}
+
+a {
+  color: #00b7ff;
+}
+
+#settings-space {
+  background-color: white;
+  height: 100%;
+}
+
+#rewards-space {
+  background-color: white;
+  height: 100%;
+}
+
+#settings-button:hover {
+  cursor: pointer;
+}
+
+span:hover {
+  cursor: pointer;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+#main-navbar {
+  background-color: #ffd1e8;
+}
