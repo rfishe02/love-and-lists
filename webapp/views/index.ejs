@@ -13,6 +13,22 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/stylesheets/style.css" />
+
+    <style>
+      @media (min-width: 800px) {
+        .modal {
+          --bs-modal-width: 50%;
+
+        }
+      }
+      @media (max-width: 799px) {
+        .modal {
+          --bs-modal-width: 75%;
+
+        }
+      }
+    </style>
+
   </head>
   <body onload="appSetup()">
     <!--<h1><%= title %></h1>
@@ -144,7 +160,6 @@
       </div>
     </div>
 
-    <!--
     <div id="chara-modal" class="modal" tabindex="-1" aria-labelledby="chara-modal-label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -153,10 +168,14 @@
           </div>
           <div class="modal-body">
             <div class="row justify-content-center">
-              <img id="chara-modal-img" src="#" style="height: 275px; object-fit: cover;">
-            </div>
-            <div id="chara-modal-text" class="row mt-3 justify-content-center">
-              
+
+              <div class="col-12 mb-3 col-lg-6">
+                <img id="chara-modal-img" src="#" style="width:100%; object-fit: cover;">
+              </div>
+              <div class="col-12 col-lg-6">
+                <div id="chara-modal-text" class="row justify-content-center"></div>
+              </div>
+
             </div>
           </div>
           <div class="modal-footer">
@@ -164,10 +183,10 @@
           </div>
         </div>
       </div>
-    </div>-->
+    </div>
 
     <div id="rewards-space" class="container pt-3" style="display: none">
-      <div id="reward-card-grid" class="row row-cols-1 row-cols-md-2 g-1"></div>
+      <div id="reward-card-grid" class="row row-cols-3 row-cols-md-5 g-4" style="height: 600px; overflow-y: scroll;"></div>
     </div>
 
     <div id="settings-space" class="container pt-3" style="display: none">
@@ -364,6 +383,7 @@
         .getElementById("rewards-button")
         .addEventListener("click", function (event) {
           showRewards(<%= user_id %>);
+          document.getElementById("rewards-badge").style.display = "none";
         });
 
       document

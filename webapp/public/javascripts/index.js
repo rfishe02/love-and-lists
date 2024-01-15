@@ -30,7 +30,7 @@ function buildSettingsForm() {
 }
 
 function loadTasks(user_id) {
-  fetch(window.location.origin + "/tasks/get?user_id=" + user_id)
+  fetch(`${window.location.origin}/tasks/get?user_id=${user_id}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Task response was not OK");
@@ -82,7 +82,7 @@ function loadChara(user_id) {
   typeSelect.value = "Tsundere";
   displayTypeHelp();
 
-  fetch(window.location.origin + "/chara/get?chara_id=1&user_id=" + user_id)
+  fetch(`${window.location.origin}/chara/get?chara_id=1&user_id=${user_id}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Chara response was not OK");
@@ -157,7 +157,7 @@ function createNewTaskElement(taskID, taskDescription, taskDone) {
 }
 
 function addTaskToDB(user_id, taskDescription) {
-  fetch(window.location.origin + "/tasks/create", {
+  fetch(`${window.location.origin}/tasks/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -184,7 +184,7 @@ function addTaskToDB(user_id, taskDescription) {
 function markTaskAsClosedInDB(user_id, taskID) {
   const taskDesc = document.getElementById("task-desc" + taskID).innerHTML;
 
-  fetch(window.location.origin + "/tasks/closed", {
+  fetch(`${window.location.origin}/tasks/closed`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -206,7 +206,7 @@ function markTaskAsClosedInDB(user_id, taskID) {
 }
 
 function deleteTaskFromDB(user_id, taskID) {
-  fetch(window.location.origin + "/tasks/delete", {
+  fetch(`${window.location.origin}/tasks/delete`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -249,7 +249,7 @@ async function generateRewardContent(user_id, taskDesc) {
   formData.append("task_desc", taskDesc);
   const json = JSON.stringify(Object.fromEntries(formData));
 
-  fetch(window.location.origin + "/rewards/create", {
+  fetch(`${window.location.origin}/rewards/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -272,37 +272,6 @@ async function generateRewardContent(user_id, taskDesc) {
     .catch((error) => {
       console.error("Database GET error:", error);
     });
-
-  /*
-    const url = new URL(window.location.origin + '/openai/get');
-    url.search = new URLSearchParams({
-      "chara_name": charaName.value, 
-      "chara_hair": hairSelect.value,
-      "chara_eyes": eyeSelect.value,
-      "chara_type": typeSelect.value, 
-      "task_desc": taskDesc,
-    });
-    fetch(url.toString(),{
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error('OpenAI response was not OK');
-      }
-      return response.json();
-    }).then(data => {
-        document.getElementById("chara-modal-img").src = `data:image/jpeg;base64,${data.image}`;
-        document.getElementById("chara-modal-text").innerHTML = `<div class="col-10" style="height: 175px; overflow: scroll;"><p>${data.text}</p></div>`;
-        var charaModal = document.getElementById("chara-modal");
-        var charaModalPopup = new bootstrap.Modal(charaModal, {});
-        charaModalPopup.show();
-    }).catch(error => {
-      console.error('OpenAI GET error:', error);
-      document.getElementById("chara-modal-text").innerHTML = "";
-      document.getElementById("chara-modal-img").src = "";
-    });*/
 }
 
 function showRewards(user_id) {
@@ -311,7 +280,7 @@ function showRewards(user_id) {
   const settingsSpace = document.getElementById("settings-space");
   const rewardCardGrid = document.getElementById("reward-card-grid");
 
-  fetch(window.location.origin + "/rewards/get?user_id=" + user_id)
+  fetch(`${window.location.origin}/rewards/get?user_id=${user_id}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Task response was not OK");
@@ -320,29 +289,24 @@ function showRewards(user_id) {
     })
     .then((data) => {
       const rewards = data.rewards;
+      rewardCardGrid.innerHTML = "";
+
       for (var i = 0; i < rewards.length; i++) {
         const cardCol = document.createElement("div");
         const card = document.createElement("div");
         const cardBody = document.createElement("div");
 
         cardCol.setAttribute("class", "col");
-        card.setAttribute("class", "card shadow");
-        cardBody.setAttribute("class", "card-body m-1");
+        card.setAttribute("class", "card");
+        cardBody.setAttribute("class", "card-img-overlay");
+        cardBody.setAttribute("data-text", rewards[i].reward_paragraph);
 
         cardCol.append(card);
         card.append(cardBody);
 
-        if (rewards[i].reward_paragraph.length > 0) {
-          cardBody.innerHTML = `<p class="card-text" style="height: 175px; overflow: scroll;">${rewards[i].reward_paragraph}</p>`;
-        }
-
         if (rewards[i].reward_filename.length > 0) {
           fetch(
-            window.location.origin +
-              "/images/get?user_id=" +
-              user_id +
-              "&filename=" +
-              rewards[i].reward_filename
+            `${window.location.origin}/images/get?user_id=${user_id}&filename=${rewards[i].reward_filename}`
           )
             .then((response) => {
               if (!response.ok) {
@@ -353,11 +317,9 @@ function showRewards(user_id) {
             .then((data) => {
               const imageURL = URL.createObjectURL(data);
               const imgElement = document.createElement("img");
-              imgElement.setAttribute("class", "card-img-top");
-              imgElement.setAttribute(
-                "style",
-                "height: 275px; object-fit: cover;"
-              );
+              imgElement.setAttribute("class", "card-img");
+              imgElement.setAttribute("style", "object-fit: cover;");
+              cardBody.setAttribute("data-src", imageURL);
               imgElement.src = imageURL;
 
               card.prepend(imgElement);
@@ -367,16 +329,34 @@ function showRewards(user_id) {
             });
         }
 
+        card.addEventListener("click", cardClick);
+
         rewardCardGrid.append(cardCol);
       }
 
       rewardsSpace.style.display = "block";
       tasksSpace.style.display = "none";
       settingsSpace.style.display = "none";
-
-      document.getElementById("rewards-badge").style.display = "none";
     })
     .catch((error) => {
       console.error("Task GET error:", error);
     });
+}
+
+function cardClick(event) {
+  const rewardImage = event.target.getAttribute("data-src");
+  const rewardText = event.target.getAttribute("data-text");
+
+  if (rewardImage != undefined && rewardText != undefined) {
+    document.getElementById("chara-modal-img").src = rewardImage;
+    document.getElementById(
+      "chara-modal-text"
+    ).innerHTML = `<div class="col-10" style="overflow:auto;"><p>${rewardText}</p></div>`;
+
+    var charaModal = document.getElementById("chara-modal");
+    var charaModalPopup = new bootstrap.Modal(charaModal, {});
+    charaModalPopup.show();
+  } else {
+    // TODO: try to get reward again, if there is missing information?
+  }
 }
